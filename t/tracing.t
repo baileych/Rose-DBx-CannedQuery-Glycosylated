@@ -67,60 +67,69 @@ foreach my $data ( [ 1, q{'widget'}, q{'blue'}  ],
 
 
 # . . . and start the testing
-my $sweet = new_ok('Rose::DBx::CannedQuery::Glycosylated' =>
-		   [ rdb_class => 'My::Test::RDB',
-		     rdb_params => { domain => 'test',
-				     type => 'vapor'},
-		     sql => 'SELECT * FROM test WHERE color = ?',
-		     verbose => 3, name => 'testme' ],
-		   'Create object with verbosity level 3');
+my $sweet;
 
-my $warning = '';
-$SIG{__WARN__} = sub { $warning .= shift; };
+SKIP : {
 
-$sweet->do_many_queries({ first => [ 'red' ],
-			  second => ['green' ],
-			});
-like($warning,
-     qr/\s*[A-Za-z0-9 :\-]+::\Q Executing bind set first for query testme\E
-	\s*[A-Za-z0-9 :\-]+::\Q Executing testme with bind values:\E
-        \s*[A-Za-z0-9 :\-]+::\s+red
-	\s*[A-Za-z0-9 :\-]+::\Q with query modifiers:\E
-        \s*[A-Za-z0-9 :\-]+::\s+\Q{}\E
-	\s*[A-Za-z0-9 :\-]+::\Q Got 2 results\E
-	\s*[A-Za-z0-9 :\-]+::\Q Executing bind set second for query testme\E
-	\s*[A-Za-z0-9 :\-]+::\Q Executing testme with bind values:\E
-        \s*[A-Za-z0-9 :\-]+::\s+green
-	\s*[A-Za-z0-9 :\-]+::\Q with query modifiers:\E
-        \s*[A-Za-z0-9 :\-]+::\s+\Q{}\E
-	\s*[A-Za-z0-9 :\-]+::\Q Got 1 results\E
-       /sx,
-     'multiple named query trace message (default output)');
+  skip 'Need Log::Any::Adapter::Carp for default logger', 3
+    unless eval { require Log::Any::Adapter::Carp; };
+  my $warning = '';
+  $sweet = new_ok('Rose::DBx::CannedQuery::Glycosylated' =>
+		     [ rdb_class => 'My::Test::RDB',
+		       rdb_params => { domain => 'test',
+				       type => 'vapor'},
+		       sql => 'SELECT * FROM test WHERE color = ?',
+		       verbose => 3, name => 'testme' ],
+		     'Create object with verbosity level 3');
 
-$warning = '';
+  my $warning = '';
+  $SIG{__WARN__} = sub { $warning .= shift; };
 
-$sweet->do_many_queries([ [ [ 'red' ], [ [] ] ], [ ['green' ], 1 ] ]);
+  $sweet->do_many_queries({ first => [ 'red' ],
+			    second => ['green' ],
+			  });
+  like($warning,
+       qr/\s*[A-Za-z0-9 :\-]+::\Q Executing bind set first for query testme\E
+	  \s*[A-Za-z0-9 :\-]+::\Q Executing testme with bind values:\E
+	  \s*[A-Za-z0-9 :\-]+::\s+red
+	  \s*[A-Za-z0-9 :\-]+::\Q with query modifiers:\E
+	  \s*[A-Za-z0-9 :\-]+::\s+\Q{}\E
+	  \s*[A-Za-z0-9 :\-]+::\Q Got 2 results\E
+	  \s*[A-Za-z0-9 :\-]+::\Q Executing bind set second for query testme\E
+	  \s*[A-Za-z0-9 :\-]+::\Q Executing testme with bind values:\E
+	  \s*[A-Za-z0-9 :\-]+::\s+green
+	  \s*[A-Za-z0-9 :\-]+::\Q with query modifiers:\E
+	  \s*[A-Za-z0-9 :\-]+::\s+\Q{}\E
+	  \s*[A-Za-z0-9 :\-]+::\Q Got 1 results\E
+	 /sx,
+       'multiple named query trace message (default output)');
 
-like($warning,
-     qr/\s*[A-Za-z0-9 :\-]+::\Q Executing bind set Element0000 for query testme\E
-	\s*[A-Za-z0-9 :\-]+::\Q Executing testme with bind values:\E
-        \s*[A-Za-z0-9 :\-]+::\s+red
-	\s*[A-Za-z0-9 :\-]+::\Q with query modifiers:\E
-        \s*\s*[A-Za-z0-9 :\-]+::\s+\Q[]\E
-	\s*[A-Za-z0-9 :\-]+::\Q Got 2 results\E
-	\s*[A-Za-z0-9 :\-]+::\Q Executing bind set Element0001 for query testme\E
-	\s*[A-Za-z0-9 :\-]+::\Q Executing testme with bind values:\E
-        \s*\s*[A-Za-z0-9 :\-]+::\s+green
-	\s*[A-Za-z0-9 :\-]+::\Q with query modifiers:\E
-        \s*[A-Za-z0-9 :\-]+::\s+\Q{}, 1\E
-	\s*[A-Za-z0-9 :\-]+::\Q Got 1 results\E
-       /sx,
-     'multiple anonymous query trace message (default output)');
+  $warning = '';
 
+  $sweet->do_many_queries([ [ [ 'red' ], [ [] ] ], [ ['green' ], 1 ] ]);
+
+  like($warning,
+       qr/\s*[A-Za-z0-9 :\-]+::\Q Executing bind set Element0000 for query testme\E
+	  \s*[A-Za-z0-9 :\-]+::\Q Executing testme with bind values:\E
+	  \s*[A-Za-z0-9 :\-]+::\s+red
+	  \s*[A-Za-z0-9 :\-]+::\Q with query modifiers:\E
+	  \s*\s*[A-Za-z0-9 :\-]+::\s+\Q[]\E
+	    \s*[A-Za-z0-9 :\-]+::\Q Got 2 results\E
+	  \s*[A-Za-z0-9 :\-]+::\Q Executing bind set Element0001 for query testme\E
+	  \s*[A-Za-z0-9 :\-]+::\Q Executing testme with bind values:\E
+	  \s*\s*[A-Za-z0-9 :\-]+::\s+green
+	  \s*[A-Za-z0-9 :\-]+::\Q with query modifiers:\E
+	  \s*[A-Za-z0-9 :\-]+::\s+\Q{}, 1\E
+	  \s*[A-Za-z0-9 :\-]+::\Q Got 1 results\E
+	 /sx,
+       'multiple anonymous query trace message (default output)');
+
+}
+  
 $sweet = new_ok('Rose::DBx::CannedQuery::Glycosylated' =>
 		[ rdb_class => 'My::Test::RDB',
 		  rdb_params => { domain => 'test',
-				      type => 'vapor'},
+				  type => 'vapor'},
 		  sql => 'SELECT * FROM test WHERE color = "blue"',
 		  verbose => 3, name => 'custom_log_test',
 		  logger => My::Test::Logger->new ],

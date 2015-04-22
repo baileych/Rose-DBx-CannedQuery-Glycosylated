@@ -6,7 +6,7 @@ use warnings;
 
 package Rose::DBx::CannedQuery::Glycosylated;
 
-our($VERSION) = '1.00';
+our($VERSION) = '1.01';
 
 use Carp;
 use Scalar::Util;
@@ -235,7 +235,7 @@ Are there, for certain, but have yet to be cataloged.
 
 =head1 VERSION
 
-version 1.00
+version 1.01
 
 =head1 AUTHOR
 
